@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class PersonService {
+public class PersonService implements ICRUD {
 
     private final PersonRepository repository;
     private final PersonMapperService personMapperService;
@@ -23,7 +23,6 @@ public class PersonService {
         this.repository = repository;
         this.personMapperService = personMapperService;
     }
-
 
     public PersonResponseDto create(PersonRequestDto personRequestDto) {
         try {
@@ -53,6 +52,7 @@ public class PersonService {
         }
     }
 
+    @Override
     public PersonResponseDto delete(String dni) {
         try {
             Optional<Person> person = repository.findByDni(dni);
@@ -67,6 +67,7 @@ public class PersonService {
         }
     }
 
+    @Override
     public PersonResponseDto findOne(String dni) {
         Optional<Person> person = repository.findByDni(dni);
         if (person.isPresent()) {
@@ -76,6 +77,7 @@ public class PersonService {
         }
     }
 
+    @Override
     public List<PersonResponseDto> findAll() {
         List<Person> allPersons = repository.findAll();
         return personMapperService.convertToDtoAllPersons(allPersons);
