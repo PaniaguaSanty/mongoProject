@@ -12,6 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Person {
     @Id
     private String id;
+    private String dni;
     private String name;
     private String surname;
     private String age;

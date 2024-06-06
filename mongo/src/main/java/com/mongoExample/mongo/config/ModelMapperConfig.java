@@ -9,6 +9,8 @@ public class ModelMapperConfig {
 
     @Bean
     public ModelMapper modelMapper() {
+        //setMatchingStrategy
+        //setSkipNullEnabled
         return new ModelMapper();
     }
 

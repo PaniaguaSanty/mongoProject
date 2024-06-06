@@ -33,7 +33,7 @@ public class PersonController {
         return new ResponseEntity<>(RESPONSE, HttpStatus.CREATED);
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/update/{dni}")
     public ResponseEntity<PersonResponseDto> update(@PathVariable String id, PersonRequestDto REQUEST) {
         logger.info("Entering update method");
         PersonResponseDto RESPONSE = personService.update(id, REQUEST);
@@ -41,13 +41,14 @@ public class PersonController {
         return new ResponseEntity<>(RESPONSE, HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<PersonResponseDto> delete(@PathVariable String id) {
+    @DeleteMapping("/delete/{dni}")
+    public ResponseEntity<PersonResponseDto> delete(@PathVariable String dni) {
         logger.info("Entering delete method");
-        personService.delete(id);
+        PersonResponseDto deletedPerson = personService.delete(dni);
         logger.info("Exiting delete method");
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(deletedPerson, HttpStatus.NO_CONTENT); //  TESTEAR
     }
+
 
     @GetMapping("/findAll")
     public ResponseEntity<List<PersonResponseDto>> findAll() {
@@ -57,11 +58,9 @@ public class PersonController {
         return new ResponseEntity<>(persons, HttpStatus.FOUND);
     }
 
-    @GetMapping("/find/{id}")
-    public ResponseEntity<PersonResponseDto> findOne(@PathVariable String id) {
+    @GetMapping("/find/{dni}")
+    public ResponseEntity<PersonResponseDto> findOne(@PathVariable String dni) {
         logger.info("Entering findOne method");
-        personService.findOne(id);
-        logger.info("Exiting findOne method");
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(personService.findOne(dni), HttpStatus.OK);
     }
 }

@@ -2,7 +2,8 @@ package com.mongoExample.mongo.service;
 
 import com.mongoExample.mongo.dto.request.PersonRequestDto;
 import com.mongoExample.mongo.dto.response.PersonResponseDto;
-import com.mongoExample.mongo.exception.PersonServiceException;
+import com.mongoExample.mongo.exception.EntityNotFoundException;
+import com.mongoExample.mongo.exception.ServiceException;
 import com.mongoExample.mongo.mapper.PersonMapperService;
 import com.mongoExample.mongo.model.Person;
 import com.mongoExample.mongo.repository.PersonRepository;
@@ -17,8 +18,6 @@ public class PersonService {
     private final PersonRepository repository;
     private final PersonMapperService personMapperService;
 
-    //TO-DO: LA INTERACCIÓN DEBE SER CON LOS DTO´S
-
 
     public PersonService(PersonRepository repository, PersonMapperService personMapperService) {
         this.repository = repository;
@@ -31,44 +30,55 @@ public class PersonService {
             Person person = personMapperService.convertToEntity(personRequestDto);
             Person savedPerson = repository.save(person);
             return personMapperService.convertToDto(savedPerson);
-        } catch (Exception e) {
-            throw new PersonServiceException("Error while creating the person: ", e);
+        } catch (ServiceException e) {
+            throw new EntityNotFoundException("Error while creating the person: ", e);
         }
     }
 
     public PersonResponseDto update(String id, PersonRequestDto personRequestDto) {
         try {
             Person existingPerson = repository.findById(id)
-                    .orElseThrow(() -> new PersonServiceException("Person not found with the current ID"));
-            // Actualizar atributos
+                    .orElseThrow(() -> new EntityNotFoundException("Person not found with the current ID"));
+
             existingPerson.setName(personRequestDto.getName());
+            existingPerson.setDni(personRequestDto.getDni());
             existingPerson.setSurname(personRequestDto.getSurname());
             existingPerson.setAge(personRequestDto.getAge());
             existingPerson.setAddress(personRequestDto.getAddress());
 
             Person updatedPerson = repository.save(existingPerson);
             return personMapperService.convertToDto(updatedPerson);
-        } catch (Exception e) {
-            throw new PersonServiceException("Error while updating the person: ", e);
+        } catch (ServiceException e) {
+            throw new ServiceException("Error while updating the person: ", e);
         }
     }
 
-    public void delete(String id) {
+    public PersonResponseDto delete(String dni) {
         try {
-            repository.deleteById(id);
-        } catch (PersonServiceException e) {
-            throw new PersonServiceException("Can´t found the person with the current ID: ", e);
+            Optional<Person> person = repository.findByDni(dni);
+            if (person.isPresent()) {
+                repository.delete(person.get());
+                return null;
+            } else {
+                throw new EntityNotFoundException("No se encontró la persona con el DNI: " + dni);
+            }
+        } catch (ServiceException e) {
+            throw new ServiceException("Error al eliminar la persona: ", e);
         }
-
     }
 
-    public PersonResponseDto findOne(String id) {
-        Optional<Person> person = repository.findById(id);
-        return personMapperService.convertToDto(person.orElse(null));
+    public PersonResponseDto findOne(String dni) {
+        Optional<Person> person = repository.findByDni(dni);
+        if (person.isPresent()) {
+            return personMapperService.convertToDto(person.get());
+        } else {
+            throw new ServiceException("Persona no encontrada para DNI: " + dni);
+        }
     }
 
     public List<PersonResponseDto> findAll() {
         List<Person> allPersons = repository.findAll();
         return personMapperService.convertToDtoAllPersons(allPersons);
     }
+
 }
